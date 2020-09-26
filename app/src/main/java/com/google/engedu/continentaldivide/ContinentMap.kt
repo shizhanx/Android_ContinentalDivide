@@ -17,8 +17,8 @@ package com.google.engedu.continentaldivide
 import android.content.Context
 import android.graphics.Canvas
 import android.view.View
-import kotlin.random.Random
-import java.util.*
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 class ContinentMap(context: Context?) : View(context) {
     private var map: Array<Cell?>
@@ -43,7 +43,7 @@ class ContinentMap(context: Context?) : View(context) {
     }
 
     private fun getMap(x: Int, y: Int): Cell? {
-        return if (x >= 0 && x < boardSize && y >= 0 && y < boardSize) map[x + boardSize * y] else null
+        return if (x in 0 until boardSize && y in 0 until  boardSize) map[x + boardSize * y] else null
     }
 
     fun clearContinentalDivide() {
@@ -132,7 +132,7 @@ class ContinentMap(context: Context?) : View(context) {
     }
 
     fun generateTerrain(detail: Int) {
-        val newBoardSize = (Math.pow(2.0, detail.toDouble()) + 1).toInt()
+        val newBoardSize = (2.0.pow(detail.toDouble()) + 1).toInt()
         if (newBoardSize != boardSize * boardSize) {
             boardSize = newBoardSize
             map = arrayOfNulls(boardSize * boardSize)
@@ -159,12 +159,12 @@ class ContinentMap(context: Context?) : View(context) {
     }
 
     init {
-        boardSize = Math.sqrt(Companion.DEFAULT_MAP.size.toDouble()).toInt()
+        boardSize = sqrt(DEFAULT_MAP.size.toDouble()).toInt()
         map = arrayOfNulls(boardSize * boardSize)
         for (i in 0 until boardSize * boardSize) {
             map[i] = Cell()
-            map[i]!!.height = Companion.DEFAULT_MAP[i]
+            map[i]!!.height = DEFAULT_MAP[i]
         }
-        maxHeight = Collections.max(Arrays.asList(*Companion.DEFAULT_MAP))
+        maxHeight = DEFAULT_MAP.maxOrNull()!!
     }
 }
