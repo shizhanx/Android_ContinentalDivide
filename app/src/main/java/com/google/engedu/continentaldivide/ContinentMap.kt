@@ -15,7 +15,8 @@
 package com.google.engedu.continentaldivide
 
 import android.content.Context
-import android.graphics.Canvas
+import android.graphics.*
+import android.graphics.drawable.shapes.RectShape
 import android.view.View
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -40,6 +41,12 @@ class ContinentMap(context: Context?) : View(context) {
         var flowsSE = false
         var basin = false
         var processing = false
+        val r = Rect()
+        val paint = Paint()
+        val textPaint = Paint().apply {
+            color = Color.BLACK
+            textAlign = Paint.Align.CENTER
+        }
     }
 
     private fun getMap(x: Int, y: Int): Cell? {
@@ -58,11 +65,21 @@ class ContinentMap(context: Context?) : View(context) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        /**
-         *
-         * YOUR CODE GOES HERE
-         *
-         */
+        val unitWidth = width / boardSize
+        val unitShade = 128 / maxHeight
+        for (i in map.indices) {
+            val cell = map[i]
+            if (cell != null) {
+                val shade = 255 - unitShade * cell.height
+                val x = i % boardSize
+                val y = i / boardSize
+                cell.r.set(unitWidth * x, unitWidth * y, unitWidth * (x + unitWidth), unitWidth * (y + unitWidth))
+                cell.paint.color = Color.rgb(shade, shade, shade)
+                cell.textPaint.textSize = unitWidth / 2f
+//                canvas.drawRect(cell.r, cell.paint)
+                canvas.drawText(cell.height.toString(), cell.r.centerX().toFloat(), cell.r.centerY().toFloat(), cell.textPaint)
+            }
+        }
     }
 
     fun buildUpContinentalDivide(oneStep: Boolean) {
@@ -161,10 +178,11 @@ class ContinentMap(context: Context?) : View(context) {
     init {
         boardSize = sqrt(DEFAULT_MAP.size.toDouble()).toInt()
         map = arrayOfNulls(boardSize * boardSize)
-        for (i in 0 until boardSize * boardSize) {
-            map[i] = Cell()
-            map[i]!!.height = DEFAULT_MAP[i]
-        }
         maxHeight = DEFAULT_MAP.maxOrNull()!!
+        for (i in 0 until boardSize * boardSize) {
+            map[i] = Cell().apply {
+                height = DEFAULT_MAP[i]
+            }
+        }
     }
 }
