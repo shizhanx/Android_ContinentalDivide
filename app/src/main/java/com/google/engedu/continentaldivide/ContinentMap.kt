@@ -16,8 +16,6 @@ package com.google.engedu.continentaldivide
 
 import android.content.Context
 import android.graphics.*
-import android.graphics.drawable.shapes.RectShape
-import android.util.Log
 import android.view.View
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -115,7 +113,7 @@ class ContinentMap(context: Context?) : View(context) {
                 cell.flowsNW = flowsNW || cell.flowsNW
                 cell.flowsSE = flowsSE || cell.flowsSE
                 cell.processing = true
-                for (dir in DIRECTORIES) {
+                for (dir in DIRECTIONS) {
                     buildUpContinentalDivideRecursively(x + dir[0], y + dir[1], flowsNW, flowsSE, cell.height)
                 }
                 cell.processing = false
@@ -151,13 +149,28 @@ class ContinentMap(context: Context?) : View(context) {
         invalidate()
     }
 
-    private fun buildDownContinentalDivideRecursively(x: Int, y: Int, previousHeight: Int): Cell {
-        /**
-         *
-         * YOUR CODE GOES HERE
-         *
-         */
-        return Cell()
+    private fun buildDownContinentalDivideRecursively(x: Int, y: Int, previousHeight: Int): Cell? {
+        if (x in 0 until boardSize && y in 0 until boardSize) {
+            val cell = getMap(x, y)!!
+            return if (!cell.processing && cell.height <= previousHeight) {
+                cell.apply {
+                    processing = true
+                    if (x == 0 || y == 0 || x == boardSize - 1 || y == boardSize - 1) {
+                        flowsNW = x == 0 || y == 0
+                        flowsSE = x == boardSize - 1 || y == boardSize - 1
+                    }
+                    for (dir in DIRECTIONS) {
+                        val next = buildDownContinentalDivideRecursively(x+dir[0], y+dir[1], cell.height)
+                        if (next!=null) {
+                            flowsSE = flowsSE || next.flowsSE
+                            flowsNW = flowsNW || next.flowsNW
+                        }
+                    }
+                    processing = false
+                }
+                cell
+            } else null
+        } else return null
     }
 
     fun generateTerrain(detail: Int) {
@@ -186,7 +199,7 @@ class ContinentMap(context: Context?) : View(context) {
                 6, 7, 3, 4, 5, 7,
                 5, 1, 2, 3, 4, 7,
                 7, 5, 4, 5, 6, 8)
-        private val DIRECTORIES = arrayOf(
+        private val DIRECTIONS = arrayOf(
                 arrayOf(0, 1),
                 arrayOf(1, 0),
                 arrayOf(0, -1),
