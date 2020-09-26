@@ -17,6 +17,7 @@ package com.google.engedu.continentaldivide
 import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.shapes.RectShape
+import android.util.Log
 import android.view.View
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -50,7 +51,7 @@ class ContinentMap(context: Context?) : View(context) {
     }
 
     private fun getMap(x: Int, y: Int): Cell? {
-        return if (x in 0 until boardSize && y in 0 until  boardSize) map[x + boardSize * y] else null
+        return if (x in 0 until boardSize && y in 0 until boardSize) map[x + boardSize * y] else null
     }
 
     fun clearContinentalDivide() {
@@ -73,11 +74,16 @@ class ContinentMap(context: Context?) : View(context) {
                 val shade = 255 - unitShade * cell.height
                 val x = i % boardSize
                 val y = i / boardSize
-                cell.r.set(unitWidth * x, unitWidth * y, unitWidth * (x + unitWidth), unitWidth * (y + unitWidth))
-                cell.paint.color = Color.rgb(shade, shade, shade)
+                cell.r.set(unitWidth * x, unitWidth * y, unitWidth * (x + 1), unitWidth * (y + 1))
+                cell.paint.color = when(true) {
+                    cell.flowsNW && cell.flowsSE -> Color.rgb(shade, 0, 0)
+                    cell.flowsNW -> Color.rgb(0, shade, 0)
+                    cell.flowsSE -> Color.rgb(0, 0, shade)
+                    else -> Color.rgb(shade, shade, shade)
+                }
                 cell.textPaint.textSize = unitWidth / 2f
-//                canvas.drawRect(cell.r, cell.paint)
-                canvas.drawText(cell.height.toString(), cell.r.centerX().toFloat(), cell.r.centerY().toFloat(), cell.textPaint)
+                canvas.drawRect(cell.r, cell.paint)
+                canvas.drawText(cell.height.toString(), cell.r.exactCenterX(), cell.r.exactCenterY(), cell.textPaint)
             }
         }
     }
