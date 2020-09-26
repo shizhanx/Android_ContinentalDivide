@@ -75,7 +75,7 @@ class ContinentMap(context: Context?) : View(context) {
                 val x = i % boardSize
                 val y = i / boardSize
                 cell.r.set(unitWidth * x, unitWidth * y, unitWidth * (x + 1), unitWidth * (y + 1))
-                cell.paint.color = when(true) {
+                cell.paint.color = when (true) {
                     cell.flowsNW && cell.flowsSE -> Color.rgb(shade, 0, 0)
                     cell.flowsNW -> Color.rgb(0, shade, 0)
                     cell.flowsSE -> Color.rgb(0, 0, shade)
@@ -93,7 +93,6 @@ class ContinentMap(context: Context?) : View(context) {
         var iterated = false
         for (x in 0 until boardSize) {
             for (y in 0 until boardSize) {
-                val cell = getMap(x, y)
                 if (x == 0 || y == 0 || x == boardSize - 1 || y == boardSize - 1) {
                     buildUpContinentalDivideRecursively(
                             x, y, x == 0 || y == 0, x == boardSize - 1 || y == boardSize - 1, -1)
@@ -110,11 +109,18 @@ class ContinentMap(context: Context?) : View(context) {
 
     private fun buildUpContinentalDivideRecursively(
             x: Int, y: Int, flowsNW: Boolean, flowsSE: Boolean, previousHeight: Int) {
-        /**
-         *
-         * YOUR CODE GOES HERE
-         *
-         */
+        if (x in 0 until boardSize && y in 0 until boardSize) {
+            val cell = getMap(x, y)!!
+            if (!cell.processing && previousHeight <= cell.height) {
+                cell.flowsNW = flowsNW || cell.flowsNW
+                cell.flowsSE = flowsSE || cell.flowsSE
+                cell.processing = true
+                for (dir in DIRECTORIES) {
+                    buildUpContinentalDivideRecursively(x + dir[0], y + dir[1], flowsNW, flowsSE, cell.height)
+                }
+                cell.processing = false
+            }
+        }
     }
 
     fun buildDownContinentalDivide(oneStep: Boolean) {
@@ -174,11 +180,17 @@ class ContinentMap(context: Context?) : View(context) {
     companion object {
         const val MAX_HEIGHT = 255
         private val DEFAULT_MAP = arrayOf(
-                1, 2, 3, 4, 5,
-                2, 3, 4, 5, 6,
-                3, 4, 5, 3, 1,
-                6, 7, 3, 4, 5,
-                5, 1, 2, 3, 4)
+                1, 2, 3, 4, 5, 6,
+                2, 3, 4, 5, 6, 7,
+                3, 4, 0, 0, 1, 7,
+                6, 7, 3, 4, 5, 7,
+                5, 1, 2, 3, 4, 7,
+                7, 5, 4, 5, 6, 8)
+        private val DIRECTORIES = arrayOf(
+                arrayOf(0, 1),
+                arrayOf(1, 0),
+                arrayOf(0, -1),
+                arrayOf(-1, 0))
     }
 
     init {
